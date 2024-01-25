@@ -30,7 +30,7 @@ async def on_ready():
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CheckFailure):
-        await ctx.send("Você não tem permissão para executar este comando ou somente o dono pode executá-lo.")
+        await ctx.send("Você não tem permissão para executar este comando")
     else:
         print(f"Erro não tratado: {error}")
 
