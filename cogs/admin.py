@@ -21,11 +21,11 @@ class Admin(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(name='adm')
-    async def _adm(self, ctx):
-        await ctx.channel.send('!adm <command>')
+    @commands.group(name='mod')
+    async def _mod(self, ctx):
+        await ctx.channel.send('!mod <command>')
 
-    @_adm.command(name='kick')
+    @_mod.command(name='kick')
     async def _kick(self, ctx, user: discord.Member, *, reason=None):
         if ctx.guild.me.guild_permissions.kick_members and ctx.author.guild_permissions.kick_members:
             try:
@@ -36,7 +36,7 @@ class Admin(commands.Cog):
         else:
             await ctx.send(f'Sem permissão para expulsar membros')
 
-    @_adm.command(name='ban')
+    @_mod.command(name='ban')
     async def _ban(ctx, user: discord.Member, *, reason=None):
         if ctx.guild.me.guild_permissions.ban_members and ctx.author.guild_permissions.ban_members:
             try:
@@ -47,7 +47,7 @@ class Admin(commands.Cog):
         else:
             await ctx.send(f'Sem permissão para banir membros')
 
-    @_adm.command(name='unban')
+    @_mod.command(name='unban')
     async def _unban(ctx, user_id: int, reason=None):
         if ctx.author.guild_permissions.ban_members and ctx.guild.me.guild_permissions.ban_members:
             try:
@@ -58,7 +58,7 @@ class Admin(commands.Cog):
         else:
             await ctx.send('Sem permissão para desbanir.')
 
-    @_adm.command(name='mute')
+    @_mod.command(name='mute')
     async def mute(ctx, member: discord.Member, duration=None, *, reason=None):
         if ctx.author.guild_permissions.mute_members:
             muted_role = discord.utils.get(ctx.guild.roles, name='Muted')
@@ -80,7 +80,7 @@ class Admin(commands.Cog):
         else:
             await ctx.send('Você não tem permissão para mutar membros.')
     
-    @_adm.command(name='unmute', hidden=True)
+    @_mod.command(name='unmute', hidden=True)
     async def _unmute(ctx, user: discord.Member):
         """
         Desmuta um usuário específico
@@ -100,7 +100,7 @@ class Admin(commands.Cog):
         else:
             await ctx.send(f'{user.mention} não possui o cargo "Muted".')
 
-    @_adm.command(name='clear', hidden=True)
+    @_mod.command(name='clear', hidden=True)
     async def _clear(ctx, quantity: int):
         """
         Exclui as mensagens de um canal onde o comando "!mod clear <quantidade>" foi chamado
