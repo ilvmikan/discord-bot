@@ -3,7 +3,7 @@ from discord.ext import commands
 
 class Config(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot  # Correção: Atribuir 'bot' ao atributo 'self.bot'
+        self.bot = bot
 
     @commands.group(name='config', invoke_without_command=True)
     async def _config(self, ctx):
