@@ -6,7 +6,7 @@ class Games(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(name='game')
+    @commands.group(name='game', invoke_without_command=True)
     async def game(self, ctx):
         await ctx.channel.send('!game <command>')
 
