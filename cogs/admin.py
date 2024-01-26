@@ -21,47 +21,46 @@ class Admin(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    async def check_permissions(self, ctx, action):
-        required_permissions = discord.Permissions()
-        required_permissions.update(**{action: True})
-
-        if not ctx.guild.me.guild_permissions >= required_permissions or not ctx.author.guild_permissions >= required_permissions:
-            await ctx.send(f'Você não tem permissão para usar esse comando')
-            return False
-        return True
-
     async def perform_action(self, ctx, action, user, reason=None):
         try:
             method = getattr(ctx.guild, action)
+            action_name = {'kick': 'expulso', 
+                      'ban': 'banido', 
+                      'unban': 'desbanido'}
+            
+            action_name_2 = {'kick': 'expulsar', 
+                      'ban': 'banir', 
+                      'unban': 'desbanir'}
+            
             await method(user, reason=reason)
-            await ctx.send(f'{user} foi {action}, razão: {reason}')
+            await ctx.send(f'{user} foi {action_name[action]}, razão: {reason}')
         except discord.Forbidden:
-            await ctx.send(f'Sem permissão para {action} {user}')
+            await ctx.send(f'Sem permissão para {action_name_2[action]} {user}')
 
     @commands.group(name='mod', invoke_without_command=True)
     async def _mod(self, ctx):
         await ctx.channel.send('!mod <command>')
 
+    @commands.has_guild_permissions(kick_members=True)
     @_mod.command(name='kick')
     async def _kick(self, ctx, user: discord.Member, *, reason=None):
-        if await self.check_permissions(ctx, 'kick_members'):
-            await self.perform_action(ctx, 'kick', user, reason)
+        await self.perform_action(ctx, 'kick', user, reason)
 
+    @commands.has_guild_permissions(ban_members=True)
     @_mod.command(name='ban')
     async def _ban(self, ctx, user: discord.Member, *, reason=None):
-        if await self.check_permissions(ctx, 'ban_members'):
-            await self.perform_action(ctx, 'ban', user, reason)
+        await self.perform_action(ctx, 'ban', user, reason)
 
+    @commands.has_guild_permissions(ban_members=True)
     @_mod.command(name='unban')
     async def _unban(self, ctx, user_id: int, reason=None):
-        if await self.check_permissions(ctx, 'ban_members'):
-            user = discord.Object(id=user_id)
-            await self.perform_action(ctx, 'unban', user, reason)
+        user = discord.Object(id=user_id)
+        await self.perform_action(ctx, 'unban', user, reason)
 
+    @commands.has_guild_permissions(mute_members=True)
     @_mod.command(name='mute')
-    async def mute(self, ctx, member: discord.Member, duration=None, *, reason=None):
-        if await self.check_permissions(ctx, 'mute_members'):
-            await self.handle_mute(ctx, member, duration, reason)
+    async def mute(self, ctx, member: discord.Member, duration=None, *, reason=None):    
+        await self.handle_mute(ctx, member, duration, reason)
 
     async def handle_mute(self, ctx, member, duration, reason):
         muted_role = discord.utils.get(ctx.guild.roles, name='Muted')
@@ -79,6 +78,7 @@ class Admin(commands.Cog):
 
         await ctx.send(f'{member.mention} foi mutado.')
 
+    @commands.has_guild_permissions(mute_members=True)
     @_mod.command(name='unmute', hidden=True)
     async def _unmute(self, ctx, user: discord.Member):
         muted_role = discord.utils.get(ctx.guild.roles, name='Muted')
