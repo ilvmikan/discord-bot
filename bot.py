@@ -5,7 +5,7 @@ import os
 from cogs.greetings import Greetings
 from cogs.games import Games
 from cogs.admin import Admin
-from cogs.config import Config
+from cogs.server_config import Config
 from cogs.members import Members
 
 load_dotenv()
