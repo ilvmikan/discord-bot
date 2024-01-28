@@ -6,7 +6,7 @@ from cogs.greetings import Greetings
 from cogs.games import Games
 from cogs.admin import Admin
 from cogs.server_config import Config
-from cogs.members import Members
+from cogs.user_profile.profile import Profile
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
@@ -25,7 +25,7 @@ async def on_ready():
     await bot.add_cog(Games(bot))
     await bot.add_cog(Admin(bot))
     await bot.add_cog(Config(bot))
-    await bot.add_cog(Members(bot))
+    await bot.add_cog(Profile(bot))
 
 @bot.event
 async def on_command_error(ctx, error):
