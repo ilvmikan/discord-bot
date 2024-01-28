@@ -3,25 +3,11 @@ import discord
 import re
 from time import time
 
-def parse_duration(duration):
-    pattern = re.compile(r'(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?')
-
-    match = pattern.match(duration)
-    if not match:
-        raise ValueError('Formato de duração inválido')
-
-    hours = int(match.group(1) or 0)
-    minutes = int(match.group(2) or 0)
-    seconds = int(match.group(3) or 0)
-
-    total_seconds = hours * 3600 + minutes * 60 + seconds
-    return total_seconds
-
 class Admin(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    async def perform_action(self, ctx, action, user, reason=None):
+    async def perform_action(self, ctx, action, user, reason='Tenho permissão, então eu posso.'):
         try:
             method = getattr(ctx.guild, action)
             action_name = {'kick': 'expulso', 
@@ -71,15 +57,10 @@ class Admin(commands.Cog):
                 await channel.set_permissions(muted_role, speak=False, send_messages=False)
 
         await member.add_roles(muted_role, reason=reason)
-
-        if duration:
-            await discord.utils.sleep(parse_duration(duration))
-            await member.remove_roles(muted_role, reason="Tempo de mute expirado")
-
         await ctx.send(f'{member.mention} foi mutado.')
 
     @commands.has_guild_permissions(mute_members=True)
-    @_mod.command(name='unmute', hidden=True)
+    @_mod.command(name='unmute')
     async def _unmute(self, ctx, user: discord.Member):
         muted_role = discord.utils.get(ctx.guild.roles, name='Muted')
 
@@ -89,12 +70,21 @@ class Admin(commands.Cog):
 
             await user.remove_roles(muted_role)
             await ctx.send(f'{user.mention} foi desmutado.')
-        else:
-            await ctx.send(f'{user.mention} não possui o cargo "Muted".')
 
     @commands.has_guild_permissions(manage_messages=True)
-    @_mod.command(name='clear', hidden=True)
+    @_mod.command(name='clear')
     async def _clear(self, ctx, quantity: int):
+        """
+        Apaga uma quantidade de mensagens no chat onde o comando foi executado.
+    
+        Args:
+            quantity (int): A quantidade de mensagens a serem excluídas.
+    
+        Example:
+            ```
+            !mod clear 10
+            ```
+        """
         messages = await ctx.channel.purge(limit=quantity + 1)
         await ctx.send(f'{len(messages) - 1} mensagens foram excluídas')
         print(f'As mensagens do canal "{ctx.channel.name}" (ID: {ctx.channel.id}) do servidor "{ctx.guild.name}" (ID: {ctx.guild.id}) foram excluídas')
