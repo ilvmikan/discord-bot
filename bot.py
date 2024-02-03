@@ -7,6 +7,7 @@ from cogs.games import Games
 from cogs.admin import Admin
 from cogs.server_config import Config
 from cogs.user_profile.profile import Profile
+from cogs.apis import Unsplash_random_image
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
@@ -26,6 +27,7 @@ async def on_ready():
     await bot.add_cog(Admin(bot))
     await bot.add_cog(Config(bot))
     await bot.add_cog(Profile(bot))
+    await bot.add_cog(Unsplash_random_image(bot))
 
 @bot.event
 async def on_command_error(ctx, error):
