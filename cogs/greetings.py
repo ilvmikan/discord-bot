@@ -37,15 +37,5 @@ class Greetings(commands.Cog):
         channel_set = member.guild.get_channel(server_channel)
         await channel_set.send(embed=embed)
 
-    @commands.command(name='serverinfo')
-    async def hello(self, ctx, *, member: discord.Member = None):
-        """Says hello"""
-        member = member or ctx.author
-        if self._last_member is None or self._last_member.id != member.id:
-            await ctx.send(f'Hello {member.name}~')
-        else:
-            await ctx.send(f'Hello {member.name}... This feels familiar.')
-        self._last_member = member
-
 def setup(bot):
     bot.add_cog(Greetings(bot))
