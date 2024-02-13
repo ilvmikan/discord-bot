@@ -134,3 +134,6 @@ class Admin(commands.Cog):
         messages = await ctx.channel.purge(limit=quantity + 1)
         await ctx.send(f'{len(messages) - 1} mensagens foram excluídas')
         print(f'As mensagens do canal "{ctx.channel.name}" (ID: {ctx.channel.id}) do servidor "{ctx.guild.name}" (ID: {ctx.guild.id}) foram excluídas')
+
+def setup(bot):
+    bot.add_cog(Admin(bot))
