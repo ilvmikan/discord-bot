@@ -93,7 +93,7 @@ class UserProfile:
             return result[0], result[1], (result[2], result[3], result[4])
         else:
             return (
-                "Utilize !profile create <desc> <img_url> para criar seu perfil",
+                "Utilize !profile commands para saber o que você pode editar",
                 "https://i.pinimg.com/564x/b1/90/a2/b190a2ac5f6912ff2d976f3c753c0331.jpg",
                 (0, 0, 255)
             )
