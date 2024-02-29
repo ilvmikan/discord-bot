@@ -9,11 +9,11 @@ unsplash_access_key = os.getenv('UNSPLASH_ACCESS_KEY')
 url = 'https://api.unsplash.com/'
 headers = {'Authorization': f'Client-ID {unsplash_access_key}'}
 
-class Unsplash_random_image(commands.Cog):
+class Apis(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(name='uimg', innvoke_without_command=True)
+    @commands.group(name='uimg', invoke_without_command=True)
     async def _uimg(self, ctx):
         await ctx.reply('!uimg <comando>')
 
@@ -27,3 +27,11 @@ class Unsplash_random_image(commands.Cog):
         else:
             print(f'Erro na solicitação: {api_info.status_code}')
 
+
+
+
+
+            
+
+def setup(bot):
+    bot.add_cog(Apis(bot))
