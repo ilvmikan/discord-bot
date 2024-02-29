@@ -17,7 +17,7 @@ async def on_ready():
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
     print('--------')
 
-    cogs_to_add = ['greetings', 'games', 'admin', 'config', 'profile']
+    cogs_to_add = ['greetings', 'games', 'admin', 'config', 'profile', 'apis']
 
     for cog in cogs_to_add:
         try:
