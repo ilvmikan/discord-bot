@@ -1,92 +1,122 @@
 from discord.ext import commands
 import discord
+import requests
+import imghdr
+from database.db import *
+
+def is_valid_image(url):
+    try:
+        response = requests.get(url, stream=True)
+        if 'image' not in response.headers['Content-Type']:
+            return False
+        image_type = imghdr.what(None, response.content)
+        return image_type in ['jpeg', 'png']
+    except Exception as e:
+        print(f"Erro ao verificar a imagem: {e}")
+        return False
+
 
 class Profile(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.db = Database('database/discord_bot.db')
+        self.user_profile = UserProfile(db_name='database/discord_bot.db')
 
     @commands.group(name='profile', invoke_without_command=True)
     @commands.guild_only()
-    async def _info(self, ctx):
-        await ctx.send('!info command')
+    async def _profile(self, ctx):
+        await ctx.send('!profile command')
 
-    @_info.command(name='me')
+
+
+
+    @_profile.command(name='create')
+    async def _profile_create(self, ctx, *, description=None, image_url=None):
+        self.user_profile.create_table()
+
+        self.user_profile.create_user_profile(
+            id_discord=ctx.author.id,
+            description=description or 'Edite sua descrição utilizando o comando !profile desc **conteúdo**\nEdite a sua imagem utilizando !profile img **link**\nEdite a cor utilizando !profile color 255, 255, 255>',
+            image_url=image_url or 'https://i.pinimg.com/564x/b1/90/a2/b190a2ac5f6912ff2d976f3c753c0331.jpg'
+        )
+        
+        await ctx.channel.send('Perfil criado com sucesso! Utilize **!profile me**')
+
+
+
+    @_profile.command(name='me')
     async def _profile_me(self, ctx):
-        await self._profile_page(ctx, user=ctx.author)
+        user_id = ctx.author.id
+        description, bg_img, color = self.user_profile.show_user_profile(user_id)
 
-    @_info.command(name='user')
-    async def _profile_user(self, ctx, user: discord.User):
-        await self._profile_page(ctx, user=user)
-
-    async def _profile_page(self, ctx, *, user: discord.User):
-        embed_first_page = discord.Embed(
-            color=discord.Colour.blue(),
-            description='Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem q',
+        embed_profile = discord.Embed(
+            color = discord.Colour.from_rgb(color[0] or 0, color[1] or 0, color[2] or 255),
+            description=description
         )
-        embed_first_page.set_author(name=user.name, icon_url=user.avatar)
-        embed_first_page.set_image(url='https://i.pinimg.com/564x/af/69/92/af69921bd04546c232d0a0aa3ba437c5.jpg')
 
-        embed_second_page = discord.Embed(
-            color=discord.Colour.red(),
-            description='Segunda página de informações.',
+        embed_profile.set_author(name=ctx.author.name, icon_url=ctx.author.avatar)
+        embed_profile.set_image(url=bg_img)
+        await ctx.send(embed=embed_profile)
+
+
+
+    @_profile.command(name='desc')
+    async def _profile_edit_description(self, ctx, *, new_desc):
+        user_id = ctx.author.id
+        self.user_profile.edit_description(user_id, new_desc)
+        await ctx.channel.send('Descrição atualizada com sucesso!')
+
+
+
+    @_profile.command(name='img')
+    async def _profile_edit_image(self, ctx, new_img):     
+        user_id = ctx.author.id
+
+        if not is_valid_image(new_img):
+            await ctx.channel.send('Por favor, forneça um link válido para uma imagem JPEG ou PNG.')
+            return
+
+        self.user_profile.edit_image(user_id, new_img)
+        await ctx.channel.send('Imagem atualizada com sucesso!')
+
+
+
+    @_profile.command(name='color')
+    async def _profile_edit_color(self, ctx, r: int, g: int, b: int):
+        user_id = ctx.author.id
+
+        if not (0 <= r <= 255) or not (0 <= g <= 255) or not (0 <= b <= 255):
+            await ctx.channel.send('Por favor, forneça valores RGB válidos (0-255) para as cores.')
+            return
+
+        self.user_profile.edit_color(user_id, r, g, b)
+        await ctx.channel.send('Cor do perfil atualizada com sucesso!')
+
+
+
+    @_profile.command(name='config')
+    async def _profile_config(self, ctx):
+        user_id = ctx.author.id
+        id_discord, description, bg_img, color_r, color_g, color_b = self.user_profile.profile_config(user_id)
+
+        embed_profile_config = discord.Embed(
+            title=f"Configurações do Perfil - {ctx.author.name}",
+            color=discord.Colour.from_rgb(color_r, color_g, color_b)
         )
-        embed_second_page.set_author(name=user.name, icon_url=user.avatar)
+        embed_profile_config.add_field(name="Descrição", value=f"_!profile desc <conteúdo>_\n{description}", inline=False)
+        embed_profile_config.add_field(name="Imagem de Fundo", value=f"_!profile img <img_link>_\n{bg_img}", inline=False)
+        embed_profile_config.add_field(name="Cor (RGB)", value=f"({color_r}, {color_g}, {color_b})", inline=False)
 
-        # se tudo der errado, deixe somente esse embed e adicione "await ctx.channel.send(embed=embed) (altere o nome para embed)"
-        embed_third_page = discord.Embed(
-            color=discord.Colour.purple(),
-        )
-        embed_third_page.set_author(name=user.name, icon_url=user.avatar)
+        await ctx.send(embed=embed_profile_config)
 
-        member = ctx.guild.get_member(user.id)
 
-        if member:
-            if any(role.permissions.administrator for role in member.roles):
-                highest_role = f'<@&{member.top_role.id}> | __Com poderes de moderação no servidor__'
-            else:
-                highest_role = f'<@&{member.top_role.id}>' if member.top_role.name != "@everyone" else "Nenhum cargo"
 
-            embed_third_page.add_field(name='Cargo mais alto', value=highest_role, inline=True)
+    @_profile.command(name='deleteall')
+    async def delete_all(self, ctx):
+        if ctx.author.id == 1053121282767593492:
+            delete = self.user_profile.delete_table_content()
+            await ctx.channel.send(delete)
 
-            permissions = {
-                'banir': member.guild_permissions.ban_members,
-                'expulsar': member.guild_permissions.kick_members,
-                'silenciar': member.guild_permissions.mute_members,
-                'gerenciar cargos': member.guild_permissions.manage_roles,
-                'gerenciar canais': member.guild_permissions.manage_channels,
-                'mover membros em canal de voz': member.guild_permissions.move_members
-            }
 
-            allowed_permissions = [permission for permission, has_permission in permissions.items() if has_permission]
 
-            if allowed_permissions:
-                permission_text = ', '.join(allowed_permissions)
-                embed_third_page.add_field(name='Permissões no servidor', value=permission_text, inline=False)
-            else:
-                embed_third_page.add_field(name='Permissões no servidor', value='Nenhuma permissão', inline=False)
-                
 
-        pages = [embed_first_page, embed_second_page, embed_third_page]
-        current_page = 0
-        message = await ctx.send(embed=pages[current_page])
-        await message.add_reaction('⬅️')
-        await message.add_reaction('➡️')
-
-        def check(reaction, user):
-            return user == ctx.author and str(reaction.emoji) in ['⬅️', '➡️']
-
-        while True:
-            try:
-                reaction, user = await self.bot.wait_for('reaction_add', timeout=60.0, check=check)
-
-                if str(reaction.emoji) == '➡️' and current_page < len(pages) - 1:
-                    current_page += 1
-                elif str(reaction.emoji) == '⬅️' and current_page > 0:
-                    current_page -= 1
-
-                await message.edit(embed=pages[current_page])
-                await message.remove_reaction(reaction, user)
-
-            except Exception as e:
-                print(e)
-                break

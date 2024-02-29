@@ -1,2 +1,4 @@
 .env
 .venv/
+discord_bot.db
+__pycache__
