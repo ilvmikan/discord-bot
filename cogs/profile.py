@@ -28,8 +28,6 @@ class Profile(commands.Cog):
         await ctx.send('!profile command')
 
 
-
-
     @_profile.command(name='create')
     async def _profile_create(self, ctx, *, description=None, image_url=None):
         self.user_profile.create_table()
@@ -41,7 +39,6 @@ class Profile(commands.Cog):
         )
         
         await ctx.channel.send('Perfil criado com sucesso! Utilize **!profile me**')
-
 
 
     @_profile.command(name='me')
@@ -59,13 +56,11 @@ class Profile(commands.Cog):
         await ctx.send(embed=embed_profile)
 
 
-
     @_profile.command(name='desc')
     async def _profile_edit_description(self, ctx, *, new_desc):
         user_id = ctx.author.id
         self.user_profile.edit_description(user_id, new_desc)
         await ctx.channel.send('Descrição atualizada com sucesso!')
-
 
 
     @_profile.command(name='img')
@@ -80,7 +75,6 @@ class Profile(commands.Cog):
         await ctx.channel.send('Imagem atualizada com sucesso!')
 
 
-
     @_profile.command(name='color')
     async def _profile_edit_color(self, ctx, r: int, g: int, b: int):
         user_id = ctx.author.id
@@ -93,22 +87,20 @@ class Profile(commands.Cog):
         await ctx.channel.send('Cor do perfil atualizada com sucesso!')
 
 
-
     @_profile.command(name='config')
     async def _profile_config(self, ctx):
         user_id = ctx.author.id
         id_discord, description, bg_img, color_r, color_g, color_b = self.user_profile.profile_config(user_id)
 
-        embed_profile_config = discord.Embed(
+        embed = discord.Embed(
             title=f"Configurações do Perfil - {ctx.author.name}",
             color=discord.Colour.from_rgb(color_r, color_g, color_b)
         )
-        embed_profile_config.add_field(name="Descrição", value=f"_!profile desc <conteúdo>_\n{description}", inline=False)
-        embed_profile_config.add_field(name="Imagem de Fundo", value=f"_!profile img <img_link>_\n{bg_img}", inline=False)
-        embed_profile_config.add_field(name="Cor (RGB)", value=f"({color_r}, {color_g}, {color_b})", inline=False)
+        embed.add_field(name="Descrição", value=f"_!profile desc <conteúdo>_\n{description}", inline=False)
+        embed.add_field(name="Imagem de Fundo", value=f"_!profile img <img_link>_\n{bg_img}", inline=False)
+        embed.add_field(name="Cor (RGB)", value=f"({color_r}, {color_g}, {color_b})", inline=False)
 
-        await ctx.send(embed=embed_profile_config)
-
+        await ctx.send(embed=embed)
 
 
     @_profile.command(name='deleteall')
