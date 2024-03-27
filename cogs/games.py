@@ -13,10 +13,10 @@ class Games(commands.Cog):
     """
     @commands.Cog.listener()
     async def on_message(self, msg):
-        conteudo = msg.content.lower()
+        msg_escolha = msg.content.lower()
         options = ['pedra', 'papel', 'tesoura']
 
-        if conteudo not in options:
+        if msg_escolha not in options:
             return
 
         result = random.choice(options)
@@ -29,11 +29,18 @@ class Games(commands.Cog):
             ('papel', 'tesoura'): "Você perdeu!",
             ('tesoura', 'pedra'): "Você perdeu!",
         }
+        
+        title = "Você ganhou!"
 
-        if (conteudo, result) in outcomes:
-            await msg.channel.send(f"{outcomes[(conteudo, result)]}\nVocê: {conteudo}\nMinha escolha: {result}")
-        else:
-            await msg.channel.send(f"Você ganhou!\nVocê escolheu {conteudo}\nMinha escolha foi: {result}")
+        if (msg_escolha, result) in outcomes:
+            title = outcomes[(msg_escolha, result)]
+
+        embed = DiscordEmbed(  
+                    title = title,
+                    description = f"Você: {msg_escolha}\nMinha escolha: {result}"
+                )
+
+        await msg.channel.send(embed=embed)
 
 
     @commands.group(name='game', invoke_without_command=True)
