@@ -14,16 +14,30 @@ bot = commands.Bot(command_prefix=prefix, intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f'Logged in as {bot.user} (ID: {bot.user.id})')
+    print(f'Logged in as {bot.user}')
     print('--------')
 
-    cogs_to_add = ['greetings', 'games', 'admin', 'config', 'profile', 'apis']
+    api = input('Deseja importar cogs de APIS? Y/N >> ').lower()
+    
+    cogs_to_add = ['greetings', 'games', 'admin', 'config', 'profile']
+    
+    if api == 'y':
+        cogs_to_add.append('apis')
+        status_message = "APIS: IMPORTADO COM SUCESSO\nConfigure as suas keys em um .env"
+    else:
+        status_message = "APIS: NÃO IMPORTADO"
+    
+    print('=======================')
+    print(status_message)
+    print('=======================')
 
     for cog in cogs_to_add:
         try:
+            print(f"ADD: {cog} >> UTILIZE !HELP {cog.upper()} PARA SABAER MAIS")
             cog_module = __import__(f'cogs.{cog}', fromlist=[cog])
             cog_class = getattr(cog_module, cog.capitalize())
             await bot.add_cog(cog_class(bot))
+            print('=======================')
         except Exception as e:
             print(f"erro ao adicionar o cog {cog}: {e}")
 
