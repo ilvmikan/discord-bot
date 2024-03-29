@@ -6,11 +6,6 @@ class Games(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
-    """
-        TENTANDO CRIAR UM PEDRA, PAPEL e TESOURA
-        (forma horrivel)
-        REGRA: FAZER FUNCIONAR E DEPOIS REFATORAR
-    """
     @commands.Cog.listener()
     async def on_message(self, msg):
         msg_escolha = msg.content.lower()
